@@ -1,20 +1,43 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { React} from 'react';
+import { SafeAreaView, StyleSheet, View } from 'react-native';
 
-export default function App() {
+import Statuses from './sections/home/statusesComponent';
+import AudioHistory from './sections/home/audioHistoryComponent';
+
+export default function App({props}) {
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaView style={styles.safeview}>
+      <View style={styles.container}>
+        <Statuses 
+          key="0"
+          bluetoothConnected={true}
+          
+          modelConnected={true}
+          modelName={"BioNexus 1.0"}
+          
+          wifiConnected={true}
+          wifiName={"Wifi do Pedro"}
+          />
+
+        <AudioHistory key="1"/>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeview: {
+    width: "100%",
+    height: "100%",
+  },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#aaaaaa',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 20,
+    gap: 30,
   },
 });
+
