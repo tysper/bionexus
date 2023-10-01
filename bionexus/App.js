@@ -1,43 +1,52 @@
-import { React} from 'react';
-import { SafeAreaView, StyleSheet, View } from 'react-native';
+import {React} from "react";
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import { NavigationContainer } from "@react-navigation/native";
+import {StyleSheet, TouchableOpacity, View} from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import HomeScreen from "./HomeScreen";
+import SearchScreen from "./SearchScreen";
+import SettingsScreen from "./SettingsScreen";
+import { Touchable } from "react-native";
 
-import Statuses from './sections/home/statusesComponent';
-import AudioHistory from './sections/home/audioHistoryComponent';
+const Tab = createMaterialBottomTabNavigator();
 
-export default function App({props}) {
+export default function App(){
+    return (
+        <NavigationContainer>
+            <Tab.Navigator
+                screenOptions={({route}) => ({
+                    tabBarIcon: ({focused, size, color}) => {
+                        let iconName;
+                        if(route.name==="INÍCIO"){
+                            iconName = "home";
+                        } else if(route.name==="PESQUISAR"){
+                            iconName = "search";
+                        } else if(route.name==="AJUSTES") {
+                            iconName = "settings";
+                        }
+                        size = focused? 30: 25;
+                        color = focused? "#857BF7": "#787878";
+                        return (
+                            <Ionicons name={iconName} size={size} color={color}/>
+                        )
+                    },
+                    tabBarHideOnKeyboard: true,
+                })}
+                sceneAnimationType="shifting"
 
-  return (
-    <SafeAreaView style={styles.safeview}>
-      <View style={styles.container}>
-        <Statuses 
-          key="0"
-          bluetoothConnected={true}
-          
-          modelConnected={true}
-          modelName={"BioNexus 1.0"}
-          
-          wifiConnected={true}
-          wifiName={"Wifi do Pedro"}
-          />
-
-        <AudioHistory key="1"/>
-      </View>
-    </SafeAreaView>
-  );
+                barStyle={{backgroundColor: "#fff"}}
+                shifting={true}
+            >
+                <Tab.Screen key="1" name="INÍCIO" component={HomeScreen}/>
+                <Tab.Screen key="2" name="PESQUISAR" component={SearchScreen}/>
+                <Tab.Screen key="3" name="AJUSTES" component={SettingsScreen}/>
+            </Tab.Navigator>
+        </NavigationContainer>
+    )
 }
 
 const styles = StyleSheet.create({
-  safeview: {
-    width: "100%",
-    height: "100%",
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#aaaaaa',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    gap: 30,
-  },
-});
-
+    outterContainer: {
+        height: "100%",
+    }
+})

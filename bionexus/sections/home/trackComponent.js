@@ -99,7 +99,6 @@ const styles = StyleSheet.create({
         textTransform: "uppercase",
         fontWeight: "800",
         color: "#fff",
-        width: "100",
         
     },
     containerTime: {

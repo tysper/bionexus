@@ -11,9 +11,9 @@ const imgSize = 45;
 export default function Statuses(props) {
 
   const connectionStatus = [
-    {label: "status", fontawesomeIcon: "bluetooth", info: props.bluetoothConnected? "conectado" : "desconectado", color: "#3491FF"},
-    {label: "modelo", fontawesomeIcon: "bionexus", info: props.modelConnected? props.modelName: "desconectado"},
-    {label: "wifi", fontawesomeIcon: "wifi", info: props.wifiConnected? props.wifiName: "desconectado", color: "#73E77F"},
+    {label: "status", key: "1", fontawesomeIcon: "bluetooth", info: props.bluetoothConnected? "conectado" : "desconectado", color: "#3491FF"},
+    {label: "modelo", key: "2", fontawesomeIcon: "bionexus", info: props.modelConnected? props.modelName: "desconectado"},
+    {label: "wifi", key: "3", fontawesomeIcon: "wifi", info: props.wifiConnected? props.wifiName: "desconectado", color: "#73E77F"},
   ];
 
   return (
@@ -23,7 +23,7 @@ export default function Statuses(props) {
           connectionStatus.map((row) => {
             if(row.fontawesomeIcon === "bionexus"){
               return(
-                <View style={styles.statusRow}>
+                <View key={row.key} style={styles.statusRow}>
                   <Image style={styles.image} source={require(`./assets/bionexus.png`)}/>
                   <Text style={styles.label}>{row.label}:</Text>
                   <Text style={styles.info}>{row.info}</Text>
@@ -31,7 +31,7 @@ export default function Statuses(props) {
               )
             } else {
               return(
-                <View style={styles.statusRow}>
+                <View key={row.key} style={styles.statusRow}>
                   <View style={styles.iconWrapper}>
                     <FontAwesome5 name={row.fontawesomeIcon} size={iconSize} color={row.color} style={styles.icon}/>
                   </View>
