@@ -1,11 +1,17 @@
-import {View, Text, StyleSheet, Image} from "react-native";
+import {View, Text, StyleSheet} from "react-native";
+import WebView from "react-native-webview";
 import Card from "./cardComponent";
+import StreamRenderer from "./streamRenderer";
 
 export default function LiveCamera() {
     return(
         <Card backgroundColor={"#fff"} paddingHorizontal={0} paddingVertical={0}>
             <View style={styles.container}>
-                <Image style={styles.image} source={require("./assets/exemplo.jpg")} width={300} height={300}></Image>
+                <WebView
+                    style={styles.image}
+                    source={{html: `<img style="width: 100%; height: 100%;"  id="stream" src="http://192.168.0.21:81/stream">`}}
+                    // useWebView2
+                />
                 <View style={styles.textContainer}>
                     <View style={styles.dot}></View>
                     <Text style={styles.text}>Camera ao vivo</Text>
@@ -24,9 +30,11 @@ const styles = StyleSheet.create({
         overflow: "hidden"
     },
     image: {
-        width: "100%",
-        height: "100%",
-        borderRadius: 20,
+        position: "absolute",
+        top: -5,
+        bottom: -5,
+        left: -5,
+        right: -5
     },
     textContainer: {
         position: "absolute",
@@ -51,5 +59,8 @@ const styles = StyleSheet.create({
         textTransform: "uppercase",
         fontWeight: "800",
         color: "#474747",
+    },
+    video: {
+        height: "100%",
     }
 })

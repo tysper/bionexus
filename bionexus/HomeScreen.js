@@ -4,7 +4,7 @@ import { SafeAreaView, StyleSheet, View, FlatList, SectionList, Text } from 'rea
 import Statuses from './sections/home/statusesComponent';
 import AudioHistory from './sections/home/audioHistoryComponent';
 import LiveCamera from './sections/home/liveCameraComponent';
-import { StatusBar } from 'expo-status-bar';
+import { TabRouter } from '@react-navigation/native';
 
 export default function HomeScreen({props}) {
 
@@ -24,7 +24,7 @@ export default function HomeScreen({props}) {
 
   return (
     <SafeAreaView style={{flex: 1}}>
-      <StatusBar backgroundColor="#f3f3f3"></StatusBar>
+      {/* <StatusBar backgroundColor="#f3f3f3"></StatusBar> */}
       <View style={styles.listContainer}>
         
         <FlatList 

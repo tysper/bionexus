@@ -3,16 +3,16 @@ import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import Card from "./cardComponent";
 import Track from "./trackComponent";
 
-export default function AudioHistory(){
+export default function AudioHistory(props){
     return (
         <Card paddingHorizontal={0} paddingVertical={0} backgroundColor="#787878" style={{gap: 1}}>
             <View style={styles.componentTitleWrapper}>
                 <Text style={styles.componentTitle}>Últimas Transcrições</Text>
             </View>
-            <Track percentage={78} duration={10} title="Pequeno Principe"/>
-            <Track percentage={20} duration={435} title="Pequeno Principe"/>
-            <Track percentage={78} duration={788} title="Pequeno Principe"/>
-            <Track percentage={32} duration={43} title="Pequeno Principe" lastOne={true}/>
+            <Track title="Harry Potter" trackAuthor="J.K Rolling" trackType="Livro"/>
+            <Track title="Invocação do Mal" trackAuthor="Autor desconhecido" trackType="Livro"/>
+            <Track title="Pequeno Principe" trackAuthor="Antoine de Saint-Exupéry" trackType="Livro" />
+            <Track title="A Fazenda" trackAuthor="Monteiro Lobato" trackType="Livro" lastOne={true}/>
         </Card>
     )
 }

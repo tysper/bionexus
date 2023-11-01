@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {View, Text, StyleSheet, Pressable, TouchableHighlight, TouchableOpacity} from "react-native";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
-import * as Haptics from "expo-haptics";
+// import * as Haptics from "expo-haptics";
 
 export default function SettingItem(props, {children}) {   
     const [submitted, setSubmitted] = useState(false);
@@ -9,7 +9,7 @@ export default function SettingItem(props, {children}) {
 
     function onPressHandlerSwicth(){
         setSubmitted(!submitted);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         try{
             props.onPress();
         } catch {};
