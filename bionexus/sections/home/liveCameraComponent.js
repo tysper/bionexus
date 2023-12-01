@@ -1,24 +1,37 @@
+import { useContext, useState } from "react";
 import {View, Text, StyleSheet} from "react-native";
 import WebView from "react-native-webview";
 import Card from "./cardComponent";
 import StreamRenderer from "./streamRenderer";
+import Icon from "react-native-vector-icons/Ionicons";
+import { AppContext } from "../../appcontext";
 
 export default function LiveCamera() {
+    const {connectionInfo, setConnectionInfo, connectedWithServer, setConnectedWithServerr} = useContext(AppContext);
+
+    // console.log('http://'+connectionInfo["devices"]["esp32"]["local_ip"]+'/stream');
     return(
         <Card backgroundColor={"#fff"} paddingHorizontal={0} paddingVertical={0}>
             <View style={styles.container}>
-                <WebView
-                    style={styles.image}
-                    source={{html: `<img style="width: 100%; height: 100%;"  id="stream" src="http://192.168.0.21:81/stream">`}}
-                    // useWebView2
-                />
-                <View style={styles.textContainer}>
+                { connectedWithServer?
+                    <WebView
+                        style={[styles.image, {display: connectedWithServer? "flex": "none"}]}
+                        source={{html: `<img style="width: 100%; height: 100%;"  id="stream" src="${connectionInfo["devices"]? 'http://'+connectionInfo["devices"]["esp32"]["local_ip"]+'/stream': ''}">`}}
+                        useWebView2
+                    />
+                :
+                    <View style={[styles.image, {display: !connectedWithServer? "flex": "none", zIndex: 3, justifyContent: "center", alignItems: "center"}]}>
+                        <Icon name={"alert-outline"} size={50} color={"#c00"} />
+                        <Text style={{fontSize: 16, textTransform: "uppercase", fontWeight: "800"}}>Sem sinal</Text>
+                    </View>
+                }
+                <View style={[styles.textContainer]}>
                     <View style={styles.dot}></View>
                     <Text style={styles.text}>Camera ao vivo</Text>
                 </View>
             </View>
         </Card>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -27,7 +40,7 @@ const styles = StyleSheet.create({
         width: "100%",
         borderRadius: 20,
         height: 300,
-        overflow: "hidden"
+        overflow: "hidden",
     },
     image: {
         position: "absolute",

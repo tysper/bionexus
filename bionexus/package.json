@@ -10,9 +10,12 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.19.4",
     "@react-native-community/blur": "^4.3.2",
+    "@react-native-community/netinfo": "^11.1.0",
     "@react-navigation/material-bottom-tabs": "^6.2.19",
     "@react-navigation/native": "^6.1.9",
+    "buffer": "^6.0.3",
     "react": "18.2.0",
     "react-native": "0.72.6",
     "react-native-ble-manager": "^10.1.5",

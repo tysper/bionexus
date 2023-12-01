@@ -1,24 +1,25 @@
-import { React} from 'react';
+import { React, useContext, useEffect, useState} from 'react';
 import { SafeAreaView, StyleSheet, View, FlatList, SectionList, Text } from 'react-native';
 
 import Statuses from './sections/home/statusesComponent';
 import AudioHistory from './sections/home/audioHistoryComponent';
 import LiveCamera from './sections/home/liveCameraComponent';
-import { TabRouter } from '@react-navigation/native';
+import { AppContext } from './appcontext';
 
-export default function HomeScreen({props}) {
+export default function HomeScreen(props) {
+  const {bionexusConnected, setBionexusConnected, wifiConnected, setWifiConnected, wifiName} = useContext(AppContext);
 
   const items = [
     <Text style={styles.title}>Inicio</Text>,
     <LiveCamera/>,
     <Statuses
-      bluetoothConnected={true}
+      bluetoothConnected={bionexusConnected}
       
       modelConnected={true}
       modelName={"BioNexus 1.0"}
       
-      wifiConnected={true}
-      wifiName={"Wifi do Pedro"}/>,
+      wifiConnected={wifiConnected}
+      wifiName={wifiName}/>,
     <AudioHistory/>
   ]
 
