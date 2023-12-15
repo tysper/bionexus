@@ -96,7 +96,7 @@ export default Track = function(props) {
                             <View style={styles.innerContainerModal}>
                                 <ScrollView>
                                     <View style={styles.imgContainer}>
-                                        <Image source={require("./assets/background.jpg")} style={{width: 150, height: 150, borderRadius: 20, marginBottom: 15}}/>
+                                        {/* <Image source={require("./assets/background.jpg")} style={{width: 150, height: 150, borderRadius: 20, marginBottom: 15}}/> */}
 
                                         <Text style={[styles.text, {color: "#686868", fontSize: 22, marginBottom: 10}]} placeholderTextColor={"#686868"}>{props.title}</Text>
 

@@ -2,17 +2,46 @@ import { View, Text, StyleSheet } from "react-native";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import Card from "./cardComponent";
 import Track from "./trackComponent";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState, useContext } from "react";
+
+import { AppContext } from "../../appcontext";
 
 export default function AudioHistory(props){
+
+    const {lastTracks, setLastTracks} = useContext(AppContext);
+
+
+    useEffect(() => {
+        
+        async function checkLastTracks(){
+            let lastTracksArr = await AsyncStorage.getItem("tracks_last-tracks");
+
+            setLastTracks(lastTracksArr?.tracks);
+        }
+
+        checkLastTracks();
+    }, [])
+
+
+
+
     return (
         <Card paddingHorizontal={0} paddingVertical={0} backgroundColor="#787878" style={{gap: 1}}>
             <View style={styles.componentTitleWrapper}>
                 <Text style={styles.componentTitle}>Últimas Transcrições</Text>
             </View>
-            <Track title="Harry Potter" trackAuthor="J.K Rolling" trackType="Livro"/>
-            <Track title="Invocação do Mal" trackAuthor="Autor desconhecido" trackType="Livro"/>
-            <Track title="Pequeno Principe" trackAuthor="Antoine de Saint-Exupéry" trackType="Livro" />
-            <Track title="A Fazenda" trackAuthor="Monteiro Lobato" trackType="Livro" lastOne={true}/>
+
+            {
+                lastTracks?
+                lastTracks.map((el, i) => {
+                    return(
+                        <Track title={el.title} trackAuthor={el.trackAuthor} trackType={el.trackType} lastOne={i==3}/>
+                    )
+                })
+                :
+                <Text style={{marginVertical: 20, fontWeight: "600", color: "white" }}>Nenhuma transcrição recente.</Text>
+            }
         </Card>
     )
 }

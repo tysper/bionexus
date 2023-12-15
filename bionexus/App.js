@@ -1,18 +1,16 @@
-import { React, createContext, useEffect, useState} from "react";
+import { React, useEffect, useState} from "react";
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { NavigationContainer } from "@react-navigation/native";
-import {StyleSheet, TouchableOpacity, View, Image, NativeAppEventEmitter, PermissionsAndroid, Alert} from "react-native";
+import {StyleSheet, Alert} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import HomeScreen from "./HomeScreen";
 import SearchScreen from "./SearchScreen";
 import SettingsScreen from "./SettingsScreen";
-import { Touchable } from "react-native";
-import Player from "./playerComponent";
 import BleManager from "react-native-ble-manager";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppContext } from "./appcontext";
-import { Buffer } from "buffer";
 import NetInfo, {useNetInfo} from "@react-native-community/netinfo";
+import { io } from "socket.io-client";
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -36,6 +34,18 @@ export default function App(){
     const [serviceObj, setServiceObj] = useState("");
     const [connectionInfo, setConnectionInfo] = useState("");
     const [connectedWithServer, setConnectedWithServer] = useState(false);
+    const [lastReading, setLastReading] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+    const [resultFound, setResultFound] = useState(false);
+    const [lastText, setLastText] = useState("");
+    const [speakFunction, setSpeakFunction] = useState({});
+    const [currentlyPlaying, setCurrentlyPlaying] = useState(false);
+    const [base64Audio, setBase64Audio] = useState(" ");
+    const [checkLastResultFunction, setCheckLastResultFunction] = useState(" ");
+    const [keepChecking, setKeepChecking] = useState(true);
+    const [processingImage, setProcessingImage] = useState(false);
+    const [saveReading, setSaveReading] = useState(false);
+    const [lastTracks, setLastTracks] = useState([]);
 
     const {type, isConnected, details} = useNetInfo();
 
@@ -43,7 +53,11 @@ export default function App(){
     const SERVICE_UUID = "1d4285ac-eb30-42f1-95c3-0d8072e36151";
     const READ_CHARACTERISTIC_UUID = "16e057d2-8ddf-4d9b-97a8-5d674e6be18d";
     const WRITE_CHARACTERISTIC_UUID = "6406154d-b6a2-4af0-be63-ec98f3e6912c";
+    // const [BASE, setBASE] = useState("primal-turbine-327912.rj.r.appspot.com");
     const [BASE, setBASE] = useState("primal-turbine-327912.rj.r.appspot.com");
+
+    let lastReadingTimer;
+    
 
     async function connectToBionexus(deviceId){
         await BleManager.getDiscoveredPeripherals()
@@ -116,6 +130,35 @@ export default function App(){
         });
     }
 
+    
+
+    async function readText(text) {
+        let apiKey = "6a0976e2d061484ba70e64498a4d8a09";
+        let lan = "pt-br";
+        let b64 = "true";
+
+        displayLog("Requesting audio", "log");
+
+        fetch(`http://api.voicerss.org/?key=${apiKey}&hl=${lan}&src=${text}&b64=${b64}`)
+        .then((response) => {
+            if(!response.ok) {
+                displayLog("There was an error during the request!", "error", JSON.stringify(response));
+            }
+
+            return response.text();
+        })
+        .then((data) => {
+            displayLog("Text was converted to audio!", "log");
+            //store the base64 object
+            setBase64Audio(data);
+            //displays the audio controls
+            setCurrentlyPlaying(true);
+
+        })
+
+
+    }
+
     async function startServerConnection(state){
         return fetch(`http://${BASE}/start-connection/cellphone/${SERVICE_UUID}/${state.details.ipAddress}`)
         .then(() => {
@@ -129,9 +172,15 @@ export default function App(){
                 if(obj["connection_established"]){
                     setConnectedWithServer(true);
                     setConnectionInfo(obj);
+                    setIsLoading(false);
+                    // startChecking();
+                    setTimeout(() => {
+                        startWebSocketConnection();
+                    }, 2000)
                 } else {
                     getConnectionInfo();
                 }
+
             })
             .catch((err) => {
                 displayLog("The request for connection information failed", "error", err);
@@ -209,7 +258,235 @@ export default function App(){
         }, 10000);
     }
 
+
+    // function verifylastreading(){
+    //     let connected; 
+    //     setConnectedWithServer((previous) => {
+    //         connected = previous;
+    //         return previous;
+    //     })
+    //     if(connected){
+    //         fetch(`http://${BASE}/get-last-reading/${SERVICE_UUID}`)
+    //         .then((data) => {
+    //             data.json()
+    //             .then((data) => {
+    //                 displayLog(JSON.stringify(data), "reading");
+    //                 setLastReading(data);
+    //                 try{
+    //                     if(data["response"]["ParsedResults"][0]["ParsedText"].length > 0){
+    //                         let texto = data["response"]["ParsedResults"][0]["ParsedText"];
+    
+    
+    //                         fetch(`http://${BASE}/flush-reading/${SERVICE_UUID}`)
+    //                         .then((response) => {
+    //                             if(response.ok) {
+    
+    //                                 displayLog("Text found!", "log", texto)
+    //                                 // texto
+    //                                 setLastText(texto);
+    //                                 //ativar o modal
+    //                                 setResultFound(true);
+    //                                 //parar de checar por novas entradas
+    //                                 clearInterval(lastReadingTimer);
+    //                                 //ler o texto
+    //                                 readText(texto);
+    //                             } else {
+    //                                 displayLog("Error when flushing last reading!", "error");
+    //                             }
+    //                         })                      
+    //                     } else {
+    //                         setTimeout(()=> {
+    //                             verifylastreading();
+    //                         }, 1000)
+    //                     }
+    //                 } catch(err) {
+    //                     clearInterval(lastReadingTimer);
+    //                     verifylastreading();
+
+    //                     displayLog("There was an error during messaging reading!", "error", err);
+    //                 }
+    //             })
+    //         })
+    //         .catch((err) => {
+    //             displayLog("An error occurred during the text request", "error", err);
+    //         })
+    //     }
+    // }
+
+    // function startChecking(){
+    //     lastReadingTimer = setTimeout(() => {
+    //         verifylastreading();
+    //     }, 1000)
+    // }
+
+    function startWebSocketConnection(){
+        
+        let connected; 
+        setConnectedWithServer((previous) => {
+            connected = previous;
+            return previous;
+        })
+
+        displayLog("Starting websocket connection!", "log", connected);
+        if(connected){
+            const socket = io(`http://${BASE}`);
+
+            socket.on("connect", () => {
+                displayLog("Socket connection was opened!", "socket");
+            })
+            
+            socket.on("message", (msg) => {
+                displayLog("Message received!", "socket", JSON.stringify(msg));
+
+                let processingImageCurrent;
+                let keepCheckingCurrent;
+                let currentlyPlayingCurrent;
+                setProcessingImage((previous) => {
+                    processingImageCurrent = previous;
+                    return previous;
+                })
+                setKeepChecking((previous) => {
+                    keepCheckingCurrent = previous;
+                    return previous;
+                })
+                setCurrentlyPlaying((previous) => {
+                    currentlyPlayingCurrent = previous;
+                    return previous;
+                })
+
+                if(msg.command == "capture"){
+                    if(keepCheckingCurrent && !processingImageCurrent && !currentlyPlayingCurrent) {
+
+                        setLastText("");
+                        setBase64Audio(" ");
+
+
+                        let connectionInfoCurrent;
+                        setConnectionInfo((previous) => {
+                            connectionInfoCurrent = previous;
+                            return previous;
+                        })
+    
+                        let base_url = `${connectionInfoCurrent.devices.esp32.local_ip}`.split("").map((el, i, arr) => {
+                            if(i == arr.length-1){
+                                return parseInt(el)-1;
+                            } else {
+                                return el;
+                            }
+                        }).join("");
+    
+                        fetch(`http://${base_url}/control?var=framesize&val=13`)
+                        .then((response) => {
+                            if(response.ok) {
+                                displayLog("Image adjusted to 13", "log");
+                                fetch(`http://${base_url}/capture`)
+                                .then((response) => {
+                                    if(response.ok) {
+    
+                                        response.blob()
+                                        .then((blob) => {
+                                            const reader = new FileReader();
+    
+                                            reader.onload = () => {
+                                                const base64 = reader.result;
+                                                const jpegDataURL = `data:image/jpeg;base64,${base64.split(',')[1]}`;
+    
+                                                fetch(`http://${base_url}/control?var=framesize&val=3`)
+                                                .then((response) => {
+                                                    if(response.ok) {
+                                                        displayLog("Image adjusted to 13", "log");
+    
+                                                        const api_key = "K86879446488957";
+                                                        const base64Image = jpegDataURL;
+                                                        const language = "por";
+                                                        const isOverlayRequired = "false";
+                                                        const iscreatesearchablepdf = "false";
+                                                        const issearchablepdfhidetextlayer = "false";
+    
+                                                        const form_data = new FormData();
+                                                        form_data.append("base64Image", base64Image);
+                                                        form_data.append("language", language);
+                                                        form_data.append("isOverlayRequired", isOverlayRequired);
+                                                        form_data.append("iscreatesearchablepdf", iscreatesearchablepdf);
+                                                        form_data.append("issearchablepdfhidetextlayer", issearchablepdfhidetextlayer);
+    
+                                                        const headers = {
+                                                            'apikey': api_key
+                                                        }
+    
+                                                        // console.log(JSON.stringify(request_body));
+                                                        setProcessingImage(true);
+                                                        fetch("https://api.ocr.space/parse/image", {
+                                                            method: "POST",    
+                                                            headers, 
+                                                            body: form_data,
+                                                        })
+                                                        .then((response) => {
+                                                            response.json()
+                                                            .then((data) => {
+                                                                setProcessingImage(false);
+                                                                
+                                                                let texto = data["ParsedResults"][0]["ParsedText"];
+                                                                if(texto.length) {
+                                                                    console.log(data);
+                                                                    
+                                                                    displayLog("Text found!", "log", texto);
+                                                                    // texto
+                                                                    setLastText(texto);
+                                                                    //ativar o modal
+                                                                    setResultFound(true);
+                                                                    //parar de checar por novas entradas
+                                                                    // clearInterval(lastReadingTimer);
+                                                                    //ler o texto
+                                                                    readText(texto);
+                                                                    setKeepChecking(false);
+                                                                }
+                                                                
+                                                            })
+                                                        })
+    
+                                                        // console.log(jpegDataURL);
+                                                    } else {
+                                                        displayLog("An error ocurred while changing the quality!", "error");
+                                                    }
+                                        })
+    
+                                            }
+    
+                                            reader.readAsDataURL(blob);
+                                        })
+                                    } else {
+                                        displayLog("An error ocurred while capturing the image!", "error");
+                                    }
+                                })
+                            } else {
+                                displayLog("An error ocurred while changing the quality!", "error");
+                            }
+                        }).catch((err) => {
+                            displayLog("Error: ", "error", err);
+                        })
+                    }
+
+                }
+            })
+
+            socket.on("error", (err) => {
+                displayLog("An error was thrown in the websocket!", "error", JSON.stringify(err));
+            })
+
+            socket.on("disconnect", () => {
+                displayLog("The connection was closed", "socket");
+            })
+        }
+    }
+
     useEffect(()=> {
+
+       
+
+        // setSpeakFunction({readText});
+        // setCheckLastResultFunction({startChecking});
+
         //wifi section
         (async function(){
             await AsyncStorage.getItem("wifi-information")
@@ -223,13 +500,17 @@ export default function App(){
 
                     console.log(`[LOG]: Wifi information was set to the App context. (${value})`);
                 }
+                setIsLoading(true);
+                //reactivate ↓
+                // checkWifi();
 
-                checkWifi();
+                // setResultFound(true);
             })
             .catch((err) => {
                 console.log(`[LOG]: There was an error during wifi information retrival in AsyncStorage. (${err})`);
             })
         })()
+
         //bluetooth section
         // async function startBluetooth(){
         //     try {
@@ -313,17 +594,35 @@ export default function App(){
 
         //     BleManager.scan([], 5);
         // }
-
         
     }, [])
 
+
+    useEffect(() => {
+
+        async function checkSettings(){
+            const saveReading = await AsyncStorage.getItem("setting_save-reading");
+            if(saveReading){
+                if(saveReading == "true"){
+                    setSaveReading(true); 
+                    displayLog("Setting: saveReading set to true.", "log");   
+                } else {
+                    setSaveReading(false);
+                    displayLog("Setting: saveReading set to false.", "log");   
+                }
+            }
+        };
+
+        checkSettings();
+
+    }, [saveReading])
 
 
 
 
 
     return (
-        <AppContext.Provider value={{bionexusConnected, setBionexusConnected, wifiConnected, setWifiConnected, wifiName, setWifiName, wifiPassword, setWifiPassword, checkWifi, connectionInfo, setConnectionInfo, connectedWithServer, setConnectedWithServer, BASE}}>
+        <AppContext.Provider value={{bionexusConnected, setBionexusConnected, wifiConnected, setWifiConnected, wifiName, setWifiName, wifiPassword, setWifiPassword, checkWifi, connectionInfo, setConnectionInfo, connectedWithServer, setConnectedWithServer, BASE, isLoading, setIsLoading, resultFound, setResultFound, lastText, setLastText, speakFunction, setSpeakFunction, currentlyPlaying, setCurrentlyPlaying, base64Audio, setBase64Audio, checkLastResultFunction, setCheckLastResultFunction, setKeepChecking, saveReading, setSaveReading, lastTracks, setLastTracks}}>
             <NavigationContainer>
                 <Tab.Navigator
                     screenOptions={({route}) => ({

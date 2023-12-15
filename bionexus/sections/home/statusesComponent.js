@@ -11,7 +11,7 @@ const imgSize = 45;
 export default function Statuses(props) {
 
   const connectionStatus = [
-    {label: "status", key: "1", fontawesomeIcon: "bluetooth", info: props.bluetoothConnected? "conectado" : "desconectado", color: "#3491FF"},
+    // {label: "status", key: "1", fontawesomeIcon: "bluetooth", info: props.bluetoothConnected? "conectado" : "desconectado", color: "#3491FF"},
     {label: "modelo", key: "2", fontawesomeIcon: "bionexus", info: props.modelConnected? props.modelName: "desconectado"},
     {label: "wifi", key: "3", fontawesomeIcon: "wifi", info: props.wifiConnected? props.wifiName: "desconectado", color: "#73E77F"},
   ];

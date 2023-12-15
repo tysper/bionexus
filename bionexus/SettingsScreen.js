@@ -30,6 +30,7 @@ export default function SettingsScreen({navigation}){
             console.log(`[LOG]: the wifi information was set correctly (${wifiInformation})`);
             checkWifi();
             navigation.navigate("INÍCIO");
+            Keyboard.dismiss();
         } catch (err) {
             console.log(`[ERROR]: An error happened while setting the wifi information (${err})`);
         }

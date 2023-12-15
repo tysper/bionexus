@@ -1,18 +1,25 @@
 import { useState } from "react";
-import {View, Text, StyleSheet, Pressable, TouchableHighlight, TouchableOpacity} from "react-native";
+import {View, Text, StyleSheet, Pressable, TouchableOpacity} from "react-native";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
-// import * as Haptics from "expo-haptics";
 
 export default function SettingItem(props, {children}) {   
-    const [submitted, setSubmitted] = useState(false);
-    const [active, setActive] = useState(false);
+    const [submitted, setSubmitted] = useState(props.active);
 
     function onPressHandlerSwicth(){
-        setSubmitted(!submitted);
-        // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        let currentState;
+
+        setSubmitted((previous) => {
+            currentState = previous;
+            return previous;
+        })
+
+        setSubmitted(!currentState);
+
         try{
-            props.onPress();
-        } catch {};
+            props.onPress(!currentState);
+        } catch {
+            console.log("There was an error when setting a setting.", "error");
+        };
     }
 
     function onPressHandlerMore(){
